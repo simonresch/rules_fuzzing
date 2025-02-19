@@ -31,6 +31,7 @@ def fuzzing_decoration(
         dicts = None,
         instrument_binary = True,
         define_regression_test = True,
+        tags = None,
         test_size = None,
         test_tags = None,
         test_timeout = None):
@@ -63,6 +64,7 @@ def fuzzing_decoration(
           default instrumentation mode does not work for your use case, please
           file a Github issue to discuss.
         define_regression_test: If true, generate a regression test rule.
+        tags: Additional tags set on non-test targets.
         test_size: The size of the fuzzing regression test.
         test_tags: Tags set on the fuzzing regression test.
         test_timeout: The timeout for the fuzzing regression test.
@@ -73,6 +75,7 @@ def fuzzing_decoration(
     # build all the non-test targets by default and, in remote builds, all these
     # targets and their runfiles would be transferred from the remote cache to
     # the local machine, ballooning the size of the output.
+    tags = (tags or []) + ["manual"]
 
     instrum_binary_name = name + "_bin"
     launcher_name = name + "_run"
@@ -87,7 +90,7 @@ def fuzzing_decoration(
             corpus = corpus_name,
             dictionary = dict_name if dicts else None,
             testonly = True,
-            tags = ["manual"],
+            tags = tags,
         )
     else:
         fuzzing_binary_uninstrumented(
@@ -97,13 +100,14 @@ def fuzzing_decoration(
             corpus = corpus_name,
             dictionary = dict_name if dicts else None,
             testonly = True,
-            tags = ["manual"],
+            tags = tags,
         )
 
     fuzzing_corpus(
         name = corpus_name,
         srcs = corpus,
         testonly = True,
+        tags = tags,
     )
 
     if dicts:
@@ -112,13 +116,14 @@ def fuzzing_decoration(
             dicts = dicts,
             output = name + ".dict",
             testonly = True,
+            tags = tags,
         )
 
     fuzzing_launcher(
         name = launcher_name,
         binary = instrum_binary_name,
         testonly = True,
-        tags = ["manual"],
+        tags = tags,
     )
 
     if define_regression_test:
@@ -135,7 +140,7 @@ def fuzzing_decoration(
         base_name = name,
         binary = instrum_binary_name,
         testonly = True,
-        tags = ["manual"],
+        tags = tags,
     )
 
 def cc_fuzz_test(
@@ -173,7 +178,7 @@ def cc_fuzz_test(
         engine: A label pointing to the fuzzing engine to use.
         size: The size of the regression test. This does *not* affect fuzzing
           itself. Takes the [common size values](https://bazel.build/reference/be/common-definitions#test.size).
-        tags: Tags set on the regression test.
+        tags: Tags set on the generated targets.
         timeout: The timeout for the regression test. This does *not* affect
           fuzzing itself. Takes the [common timeout values](https://docs.bazel.build/versions/main/be/common-definitions.html#test.timeout).
         **binary_kwargs: Keyword arguments directly forwarded to the fuzz test
@@ -192,10 +197,9 @@ def cc_fuzz_test(
     # buildifier: disable=list-append
     binary_kwargs["deps"] += [engine]
 
-    # tags is not configurable and can thus use append.
-    binary_kwargs.setdefault("tags", []).append("manual")
     cc_binary(
         name = raw_binary_name,
+        tags = (tags or []) + ["manual"],
         **binary_kwargs
     )
 
@@ -205,6 +209,7 @@ def cc_fuzz_test(
         engine = engine,
         corpus = corpus,
         dicts = dicts,
+        tags = tags,
         test_size = size,
         test_tags = (tags or []) + [
             "fuzz-test",
@@ -261,7 +266,7 @@ def java_fuzz_test(
         engine: A label pointing to the fuzzing engine to use.
         size: The size of the regression test. This does *not* affect fuzzing
           itself. Takes the [common size values](https://bazel.build/reference/be/common-definitions#test.size).
-        tags: Tags set on the regression test.
+        tags: Tags set on the generated targets.
         timeout: The timeout for the regression test. This does *not* affect
           fuzzing itself. Takes the [common timeout values](https://docs.bazel.build/versions/main/be/common-definitions.html#test.timeout).
         **binary_kwargs: Keyword arguments directly forwarded to the fuzz test
@@ -291,7 +296,7 @@ def java_fuzz_test(
         name = metadata_binary_name,
         create_executable = False,
         deploy_manifest_lines = [target_class_manifest_line],
-        tags = ["manual"],
+        tags = (tags or []) + ["manual"],
     )
 
     # use += rather than append to allow users to pass in select() expressions for
@@ -317,12 +322,11 @@ def java_fuzz_test(
         "-XX:+CriticalJNINatives",
     ] + binary_kwargs["jvm_flags"]
 
-    # tags is not configurable and can thus use append.
-    binary_kwargs.setdefault("tags", []).append("manual")
     java_binary(
         name = raw_target_name,
         srcs = srcs,
         main_class = "com.code_intelligence.jazzer.Jazzer",
+        tags = (tags or []) + ["manual"],
         **binary_kwargs
     )
 
@@ -346,7 +350,7 @@ def java_fuzz_test(
             "//conditions:default": None,
         }),
         target = raw_target_name,
-        tags = ["manual"],
+        tags = (tags or []) + ["manual"],
     )
 
     fuzzing_decoration(
@@ -355,6 +359,7 @@ def java_fuzz_test(
         engine = engine,
         corpus = corpus,
         dicts = dicts,
+        tags = tags,
         test_size = size,
         test_tags = (tags or []) + [
             "fuzz-test",

@@ -59,7 +59,7 @@ Provider for storing the language-independent part of the specification of a fuz
 load("@rules_fuzzing//fuzzing:java_defs.bzl", "fuzzing_decoration")
 
 fuzzing_decoration(<a href="#fuzzing_decoration-name">name</a>, <a href="#fuzzing_decoration-raw_binary">raw_binary</a>, <a href="#fuzzing_decoration-engine">engine</a>, <a href="#fuzzing_decoration-corpus">corpus</a>, <a href="#fuzzing_decoration-dicts">dicts</a>, <a href="#fuzzing_decoration-instrument_binary">instrument_binary</a>,
-                   <a href="#fuzzing_decoration-define_regression_test">define_regression_test</a>, <a href="#fuzzing_decoration-test_size">test_size</a>, <a href="#fuzzing_decoration-test_tags">test_tags</a>, <a href="#fuzzing_decoration-test_timeout">test_timeout</a>)
+                   <a href="#fuzzing_decoration-define_regression_test">define_regression_test</a>, <a href="#fuzzing_decoration-tags">tags</a>, <a href="#fuzzing_decoration-test_size">test_size</a>, <a href="#fuzzing_decoration-test_tags">test_tags</a>, <a href="#fuzzing_decoration-test_timeout">test_timeout</a>)
 </pre>
 
 Generates the standard targets associated to a fuzz test.
@@ -81,6 +81,7 @@ documentation for the set of targets generated.
 | <a id="fuzzing_decoration-dicts"></a>dicts |  A list of fuzzing dictionary files.   |  `None` |
 | <a id="fuzzing_decoration-instrument_binary"></a>instrument_binary |  **(Experimental, may be removed in the future.)**<br><br>By default, the generated targets depend on `raw_binary` through a Bazel configuration using flags from the `@rules_fuzzing//fuzzing` package to determine the fuzzing build mode, engine, and sanitizer instrumentation.<br><br>When this argument is false, the targets assume that `raw_binary` is already built in the proper configuration and will not apply the transition.<br><br>Most users should not need to change this argument. If you think the default instrumentation mode does not work for your use case, please file a Github issue to discuss.   |  `True` |
 | <a id="fuzzing_decoration-define_regression_test"></a>define_regression_test |  If true, generate a regression test rule.   |  `True` |
+| <a id="fuzzing_decoration-tags"></a>tags |  Additional tags set on non-test targets.   |  `None` |
 | <a id="fuzzing_decoration-test_size"></a>test_size |  The size of the fuzzing regression test.   |  `None` |
 | <a id="fuzzing_decoration-test_tags"></a>test_tags |  Tags set on the fuzzing regression test.   |  `None` |
 | <a id="fuzzing_decoration-test_timeout"></a>test_timeout |  The timeout for the fuzzing regression test.   |  `None` |
@@ -129,7 +130,7 @@ most relevant ones are:
 | <a id="java_fuzz_test-dicts"></a>dicts |  A list containing dictionaries.   |  `None` |
 | <a id="java_fuzz_test-engine"></a>engine |  A label pointing to the fuzzing engine to use.   |  `Label("@rules_fuzzing//fuzzing:java_engine")` |
 | <a id="java_fuzz_test-size"></a>size |  The size of the regression test. This does *not* affect fuzzing itself. Takes the [common size values](https://bazel.build/reference/be/common-definitions#test.size).   |  `None` |
-| <a id="java_fuzz_test-tags"></a>tags |  Tags set on the regression test.   |  `None` |
+| <a id="java_fuzz_test-tags"></a>tags |  Tags set on the generated targets.   |  `None` |
 | <a id="java_fuzz_test-timeout"></a>timeout |  The timeout for the regression test. This does *not* affect fuzzing itself. Takes the [common timeout values](https://docs.bazel.build/versions/main/be/common-definitions.html#test.timeout).   |  `None` |
 | <a id="java_fuzz_test-binary_kwargs"></a>binary_kwargs |  Keyword arguments directly forwarded to the fuzz test binary rule.   |  none |
 
