@@ -32,6 +32,7 @@ def fuzzing_decoration(
         instrument_binary = True,
         define_regression_test = True,
         tags = None,
+        target_compatible_with = None,
         test_size = None,
         test_tags = None,
         test_timeout = None):
@@ -65,6 +66,7 @@ def fuzzing_decoration(
           file a Github issue to discuss.
         define_regression_test: If true, generate a regression test rule.
         tags: Additional tags set on non-test targets.
+        target_compatible_with: Platform constraints set on the generated targets.
         test_size: The size of the fuzzing regression test.
         test_tags: Tags set on the fuzzing regression test.
         test_timeout: The timeout for the fuzzing regression test.
@@ -91,6 +93,7 @@ def fuzzing_decoration(
             dictionary = dict_name if dicts else None,
             testonly = True,
             tags = tags,
+            target_compatible_with = target_compatible_with,
         )
     else:
         fuzzing_binary_uninstrumented(
@@ -101,6 +104,7 @@ def fuzzing_decoration(
             dictionary = dict_name if dicts else None,
             testonly = True,
             tags = tags,
+            target_compatible_with = target_compatible_with,
         )
 
     fuzzing_corpus(
@@ -108,6 +112,7 @@ def fuzzing_decoration(
         srcs = corpus,
         testonly = True,
         tags = tags,
+        target_compatible_with = target_compatible_with,
     )
 
     if dicts:
@@ -117,6 +122,7 @@ def fuzzing_decoration(
             output = name + ".dict",
             testonly = True,
             tags = tags,
+            target_compatible_with = target_compatible_with,
         )
 
     fuzzing_launcher(
@@ -124,6 +130,7 @@ def fuzzing_decoration(
         binary = instrum_binary_name,
         testonly = True,
         tags = tags,
+        target_compatible_with = target_compatible_with,
     )
 
     if define_regression_test:
@@ -133,6 +140,7 @@ def fuzzing_decoration(
             size = test_size,
             tags = test_tags,
             timeout = test_timeout,
+            target_compatible_with = target_compatible_with,
         )
 
     oss_fuzz_package(
@@ -141,6 +149,7 @@ def fuzzing_decoration(
         binary = instrum_binary_name,
         testonly = True,
         tags = tags,
+        target_compatible_with = target_compatible_with,
     )
 
 def cc_fuzz_test(
@@ -150,6 +159,7 @@ def cc_fuzz_test(
         engine = Label("//fuzzing:cc_engine"),
         size = None,
         tags = None,
+        target_compatible_with = None,
         timeout = None,
         **binary_kwargs):
     """Defines a C++ fuzz test and a few associated tools and metadata.
@@ -179,6 +189,7 @@ def cc_fuzz_test(
         size: The size of the regression test. This does *not* affect fuzzing
           itself. Takes the [common size values](https://bazel.build/reference/be/common-definitions#test.size).
         tags: Tags set on the generated targets.
+        target_compatible_with: Platform constraints set on the generated targets.
         timeout: The timeout for the regression test. This does *not* affect
           fuzzing itself. Takes the [common timeout values](https://docs.bazel.build/versions/main/be/common-definitions.html#test.timeout).
         **binary_kwargs: Keyword arguments directly forwarded to the fuzz test
@@ -200,6 +211,7 @@ def cc_fuzz_test(
     cc_binary(
         name = raw_binary_name,
         tags = (tags or []) + ["manual"],
+        target_compatible_with = target_compatible_with,
         **binary_kwargs
     )
 
@@ -210,6 +222,7 @@ def cc_fuzz_test(
         corpus = corpus,
         dicts = dicts,
         tags = tags,
+        target_compatible_with = target_compatible_with,
         test_size = size,
         test_tags = (tags or []) + [
             "fuzz-test",
@@ -235,6 +248,7 @@ def java_fuzz_test(
         engine = Label("//fuzzing:java_engine"),
         size = None,
         tags = None,
+        target_compatible_with = None,
         timeout = None,
         **binary_kwargs):
     """Defines a Java fuzz test and a few associated tools and metadata.
@@ -267,6 +281,7 @@ def java_fuzz_test(
         size: The size of the regression test. This does *not* affect fuzzing
           itself. Takes the [common size values](https://bazel.build/reference/be/common-definitions#test.size).
         tags: Tags set on the generated targets.
+        target_compatible_with: Platform constraints set on the generated targets.
         timeout: The timeout for the regression test. This does *not* affect
           fuzzing itself. Takes the [common timeout values](https://docs.bazel.build/versions/main/be/common-definitions.html#test.timeout).
         **binary_kwargs: Keyword arguments directly forwarded to the fuzz test
@@ -297,6 +312,7 @@ def java_fuzz_test(
         create_executable = False,
         deploy_manifest_lines = [target_class_manifest_line],
         tags = (tags or []) + ["manual"],
+        target_compatible_with = target_compatible_with,
     )
 
     # use += rather than append to allow users to pass in select() expressions for
@@ -327,6 +343,7 @@ def java_fuzz_test(
         srcs = srcs,
         main_class = "com.code_intelligence.jazzer.Jazzer",
         tags = (tags or []) + ["manual"],
+        target_compatible_with = target_compatible_with,
         **binary_kwargs
     )
 
@@ -351,6 +368,7 @@ def java_fuzz_test(
         }),
         target = raw_target_name,
         tags = (tags or []) + ["manual"],
+        target_compatible_with = target_compatible_with,
     )
 
     fuzzing_decoration(
@@ -360,6 +378,7 @@ def java_fuzz_test(
         corpus = corpus,
         dicts = dicts,
         tags = tags,
+        target_compatible_with = target_compatible_with,
         test_size = size,
         test_tags = (tags or []) + [
             "fuzz-test",
